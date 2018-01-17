@@ -5,6 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
+import android.graphics.Color;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,9 +18,12 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.root.bakingapp.Adapter.RecipesAdapter;
+import com.example.root.bakingapp.InternetConnection.ConnectivityReceiver;
+import com.example.root.bakingapp.InternetConnection.MyApplication;
 import com.example.root.bakingapp.Pojo.Recipe;
 import com.example.root.bakingapp.R;
 import com.example.root.bakingapp.Service.COMM;
@@ -34,10 +40,12 @@ import retrofit2.Response;
 
 import static com.example.root.bakingapp.Utilites.NetworkStateChangeReceiver.IS_NETWORK_AVAILABLE;
 
-public class HomeActivity extends AppCompatActivity implements COMM {
+public class HomeActivity extends AppCompatActivity implements COMM, ConnectivityReceiver.ConnectivityReceiverListener {
     ArrayList<Recipe> recipes;
     @BindView(R.id.recipesList)
     RecyclerView recyclerView;
+    @BindView(R.id.fab)
+    FloatingActionButton fab;
     GridLayoutManager gridLayoutManager;
     LinearLayoutManager linearLayoutManager;
 
@@ -46,48 +54,60 @@ public class HomeActivity extends AppCompatActivity implements COMM {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipes);
         ButterKnife.bind(this);
+        SizeLayout_Fun();
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Click action
+                checkConnection();
+            }
+        });
 
         if (savedInstanceState == null) {
 
-
-            SizeLayout_Fun();
             recyclerView.setHasFixedSize(true);
             Client.getRecipes(HomeActivity.this);
-
-            IntentFilter intentFilter = new IntentFilter(NetworkStateChangeReceiver.NETWORK_AVAILABLE_ACTION);
-            LocalBroadcastManager.getInstance(this).registerReceiver(
-                    new BroadcastReceiver() {
-                        @Override
-                        public void onReceive(Context context, Intent intent) {
-                            boolean isNetworkAvailable = intent.getBooleanExtra(IS_NETWORK_AVAILABLE, false);
-                            String networkStatus = isNetworkAvailable ? "connected" : "disconnected";
-                            if (networkStatus == "connected") {
-                                Client.getRecipes(HomeActivity.this);
-                            } else if (networkStatus == "disconnected") {
-                                Toast.makeText(getApplicationContext(), "ther is no internet Connection pleas open the internet", Toast.LENGTH_LONG).show();
-
-                            }
-                        }
-                    }, intentFilter);
-
         }
         OnClickELement();
 
 
     }
 
+    private void checkConnection() {
+        boolean isConnected = ConnectivityReceiver.isConnected();
+        showSnack(isConnected);
+    }
+
+    private void showSnack(boolean isConnected) {
+        String message;
+        if (isConnected) {
+            Client.getRecipes(this);
+            message = "Good! Connected to Internet";
+        } else {
+            message = "Sorry! Not connected to internet";
+        }
+
+        Toast.makeText(this,message, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MyApplication.getInstance().setConnectivityListener(this);
+    }
+
     private void SizeLayout_Fun() {
         DisplayMetrics metrics = new DisplayMetrics();
         HomeActivity.this.getWindowManager().getDefaultDisplay().getMetrics(metrics);
-        float yInches= metrics.heightPixels/metrics.ydpi;
-        float xInches= metrics.widthPixels/metrics.xdpi;
-        double diagonalInches = Math.sqrt(xInches*xInches + yInches*yInches);
-        if (diagonalInches>=6.5){
+        float yInches = metrics.heightPixels / metrics.ydpi;
+        float xInches = metrics.widthPixels / metrics.xdpi;
+        double diagonalInches = Math.sqrt(xInches * xInches + yInches * yInches);
+        if (diagonalInches >= 6.5) {
             gridLayoutManager = new GridLayoutManager(HomeActivity.this,
                     3);
             recyclerView.setLayoutManager(gridLayoutManager);
 
-        }else{
+        } else {
             linearLayoutManager = new LinearLayoutManager(HomeActivity.this,
                     LinearLayoutManager.VERTICAL,
                     false);
@@ -147,7 +167,7 @@ public class HomeActivity extends AppCompatActivity implements COMM {
                     3);
             recyclerView.setLayoutManager(gridLayoutManager);
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-             linearLayoutManager = new LinearLayoutManager(HomeActivity.this,
+            linearLayoutManager = new LinearLayoutManager(HomeActivity.this,
                     LinearLayoutManager.VERTICAL,
                     false);
             recyclerView.setLayoutManager(linearLayoutManager);
@@ -156,4 +176,8 @@ public class HomeActivity extends AppCompatActivity implements COMM {
         recyclerView.setAdapter(new RecipesAdapter(HomeActivity.this, recipes));
     }
 
+    @Override
+    public void onNetworkConnectionChanged(boolean isConnected) {
+        showSnack(isConnected);
+    }
 }

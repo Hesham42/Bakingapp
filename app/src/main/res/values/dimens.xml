@@ -6,4 +6,5 @@
     <dimen name="defult_8">8dp</dimen>
     <dimen name="defult_12">12dp</dimen>
     <dimen name="defult_16">16dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
 </resources>

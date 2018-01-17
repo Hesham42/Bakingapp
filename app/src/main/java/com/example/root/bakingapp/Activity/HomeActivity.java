@@ -11,6 +11,9 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
+import android.util.Log;
+import android.view.Display;
 import android.view.View;
 import android.widget.Toast;
 
@@ -31,55 +34,85 @@ import retrofit2.Response;
 
 import static com.example.root.bakingapp.Utilites.NetworkStateChangeReceiver.IS_NETWORK_AVAILABLE;
 
-public class HomeActivity extends AppCompatActivity implements COMM{
+public class HomeActivity extends AppCompatActivity implements COMM {
     ArrayList<Recipe> recipes;
     @BindView(R.id.recipesList)
     RecyclerView recyclerView;
     GridLayoutManager gridLayoutManager;
     LinearLayoutManager linearLayoutManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipes);
         ButterKnife.bind(this);
-        Client.getRecipes(HomeActivity.this);
 
-        recyclerView.setHasFixedSize(true);
+        if (savedInstanceState == null) {
 
-        gridLayoutManager = new GridLayoutManager(HomeActivity.this, 2);
-         linearLayoutManager = new LinearLayoutManager(HomeActivity.this,
-                LinearLayoutManager.VERTICAL,
-                false);
-        recyclerView.setLayoutManager(gridLayoutManager);
 
-        IntentFilter intentFilter = new IntentFilter(NetworkStateChangeReceiver.NETWORK_AVAILABLE_ACTION);
-        LocalBroadcastManager.getInstance(this).registerReceiver(
-                new BroadcastReceiver() {
-                    @Override
-                    public void onReceive(Context context, Intent intent) {
-                        boolean isNetworkAvailable = intent.getBooleanExtra(IS_NETWORK_AVAILABLE, false);
-                        String networkStatus = isNetworkAvailable ? "connected" : "disconnected";
-                        if (networkStatus == "connected") {
+            SizeLayout_Fun();
+            recyclerView.setHasFixedSize(true);
+            Client.getRecipes(HomeActivity.this);
 
-                            Client.getRecipes(HomeActivity.this);
-                        } else if (networkStatus == "disconnected") {
-                            Toast.makeText(getApplicationContext(), "ther is no internet Connection pleas open the internet", Toast.LENGTH_LONG).show();
+            IntentFilter intentFilter = new IntentFilter(NetworkStateChangeReceiver.NETWORK_AVAILABLE_ACTION);
+            LocalBroadcastManager.getInstance(this).registerReceiver(
+                    new BroadcastReceiver() {
+                        @Override
+                        public void onReceive(Context context, Intent intent) {
+                            boolean isNetworkAvailable = intent.getBooleanExtra(IS_NETWORK_AVAILABLE, false);
+                            String networkStatus = isNetworkAvailable ? "connected" : "disconnected";
+                            if (networkStatus == "connected") {
+                                Client.getRecipes(HomeActivity.this);
+                            } else if (networkStatus == "disconnected") {
+                                Toast.makeText(getApplicationContext(), "ther is no internet Connection pleas open the internet", Toast.LENGTH_LONG).show();
 
+                            }
                         }
-                    }
-                }, intentFilter);
+                    }, intentFilter);
+
+        }
+        OnClickELement();
 
 
-            OnClickELement();
+    }
 
+    private void SizeLayout_Fun() {
+        DisplayMetrics metrics = new DisplayMetrics();
+        HomeActivity.this.getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        float yInches= metrics.heightPixels/metrics.ydpi;
+        float xInches= metrics.widthPixels/metrics.xdpi;
+        double diagonalInches = Math.sqrt(xInches*xInches + yInches*yInches);
+        if (diagonalInches>=6.5){
+            gridLayoutManager = new GridLayoutManager(HomeActivity.this,
+                    3);
+            recyclerView.setLayoutManager(gridLayoutManager);
+
+        }else{
+            linearLayoutManager = new LinearLayoutManager(HomeActivity.this,
+                    LinearLayoutManager.VERTICAL,
+                    false);
+            recyclerView.setLayoutManager(linearLayoutManager);
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList(getResources().getString(R.string.recipes), recipes);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        recipes = savedInstanceState.getParcelableArrayList(getResources().getString(R.string.recipes));
     }
 
     private void OnClickELement() {
         recyclerView.addOnItemTouchListener(new RecyclerTouchListener(HomeActivity.this, recyclerView, new RecyclerTouchListener.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-             Intent intent = new Intent(HomeActivity.this,RecipeDetailsActivity.class);
-             startActivity(intent);
+                Intent intent = new Intent(HomeActivity.this, RecipeDetailsActivity.class);
+                startActivity(intent);
 
             }
 
@@ -104,23 +137,23 @@ public class HomeActivity extends AppCompatActivity implements COMM{
 
     }
 
-        @Override
+
+    @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-
         // Checks the orientation of the screen
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-           gridLayoutManager = new GridLayoutManager( HomeActivity.this,
+            gridLayoutManager = new GridLayoutManager(HomeActivity.this,
                     3);
             recyclerView.setLayoutManager(gridLayoutManager);
-        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
-            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(HomeActivity.this,
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+             linearLayoutManager = new LinearLayoutManager(HomeActivity.this,
                     LinearLayoutManager.VERTICAL,
                     false);
             recyclerView.setLayoutManager(linearLayoutManager);
-
         }
-            recyclerView.setAdapter(new RecipesAdapter(HomeActivity.this, recipes));
 
+        recyclerView.setAdapter(new RecipesAdapter(HomeActivity.this, recipes));
     }
+
 }

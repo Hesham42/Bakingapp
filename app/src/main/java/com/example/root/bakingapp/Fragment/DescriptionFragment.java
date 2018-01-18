@@ -1,3 +1,4 @@
+
 package com.example.root.bakingapp.Fragment;
 
 
@@ -54,16 +55,13 @@ import retrofit2.Response;
 
 public class DescriptionFragment extends Fragment {
     public final static String KEY_POSITION = "position";
-    private static final String SELECTED_POSITION = "postionVedio";
     int mCurrentPosition = -1;
     private SimpleExoPlayer mExoPlayer;
     private SimpleExoPlayerView mPlayerView;
-    long position;
 
 
     TextView mVersionDescriptionTextView;
     ArrayList<Step> steps = new ArrayList<>();
-    private Uri videoUri;
 
     public DescriptionFragment() {
 
@@ -81,13 +79,14 @@ public class DescriptionFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_description, container, false);
         mVersionDescriptionTextView = (TextView) view.findViewById(R.id.version_description);
         mPlayerView = (SimpleExoPlayerView) view.findViewById(R.id.player_view);
+
         // If the Activity is recreated, the savedInstanceStare Bundle isn't empty
         // we restore the previous version name selection set by the Bundle.
         // This is necessary when in two pane layout
         if (savedInstanceState != null) {
             mCurrentPosition = savedInstanceState.getInt(KEY_POSITION);
             steps = savedInstanceState.getParcelableArrayList(getResources().getString(R.string.steps));
-            position = savedInstanceState.getLong(SELECTED_POSITION, C.TIME_UNSET);
+
         } else {
 
             Bundle extra = getArguments();
@@ -97,12 +96,10 @@ public class DescriptionFragment extends Fragment {
         }
         return view;
     }
-
     //-------------------------------------------------------------------------
     private void initializePlayer(Uri mediaUri) {
         if (mExoPlayer == null) {
             // Create an instance of the ExoPlayer.
-            if (position != C.TIME_UNSET) mExoPlayer.seekTo(position);
             TrackSelector trackSelector = new DefaultTrackSelector();
             LoadControl loadControl = new DefaultLoadControl();
             mExoPlayer = ExoPlayerFactory.newSimpleInstance(getActivity(), trackSelector, loadControl);
@@ -115,7 +112,6 @@ public class DescriptionFragment extends Fragment {
             mExoPlayer.setPlayWhenReady(true);
         }
     }
-
     /**
      * Release ExoPlayer.
      */
@@ -150,8 +146,7 @@ public class DescriptionFragment extends Fragment {
     public void setDescription(int descriptionIndex) {
         mVersionDescriptionTextView.setText(steps.get(descriptionIndex).getShortDescription());
         mCurrentPosition = descriptionIndex;
-        videoUri=Uri.parse(steps.get(descriptionIndex).getVideoURL());
-        initializePlayer(videoUri);
+        initializePlayer(Uri.parse(steps.get(descriptionIndex).getVideoURL()));
     }
 
     @Override
@@ -160,27 +155,9 @@ public class DescriptionFragment extends Fragment {
         // Save the current description selection in case we need to recreate the fragment
         outState.putInt(KEY_POSITION, mCurrentPosition);
         outState.putParcelableArrayList(getResources().getString(R.string.steps), steps);
-        outState.putLong(SELECTED_POSITION, position = mExoPlayer.getCurrentPosition()); //then, save it on the bundle.
-
 
     }
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (videoUri != null)
-            initializePlayer(videoUri);
-    }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (mExoPlayer != null) {
-            position = mExoPlayer.getCurrentPosition();
-            mExoPlayer.stop();
-            mExoPlayer.release();
-            mExoPlayer = null;
-        }
-    }
 
     @Override
     public void onDestroy() {

@@ -31,7 +31,6 @@ public class RecipeDetailsActivity extends Activity implements OnVersionNameSele
             ingredients=bundle.getParcelableArrayList(getResources().getString(R.string.ingredients));
 
         }
-
         // Check whether the Activity is using the layout verison with the fragment_container
         // FrameLayout and if so we must add the first fragment
         if (findViewById(R.id.fragment_container) != null){
@@ -39,6 +38,7 @@ public class RecipeDetailsActivity extends Activity implements OnVersionNameSele
             // However if we are being restored from a previous state, then we don't
             // need to do anything and should return or we could end up with overlapping Fragments
             if (savedInstanceState != null){
+
                 return;
             }
 
@@ -61,7 +61,7 @@ public class RecipeDetailsActivity extends Activity implements OnVersionNameSele
         if (descriptionFragment != null){
             // If description is available, we are in two pane layout
             // so we call the method in DescriptionFragment to update its content
-            descriptionFragment.setDescription(versionNameIndex);
+             descriptionFragment.setDescription(versionNameIndex);
         } else {
             DescriptionFragment newDesriptionFragment = new DescriptionFragment();
             Bundle args = new Bundle();

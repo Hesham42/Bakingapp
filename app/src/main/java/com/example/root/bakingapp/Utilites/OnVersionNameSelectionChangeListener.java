@@ -10,7 +10,6 @@ import java.util.ArrayList;
 
 public interface OnVersionNameSelectionChangeListener {
     public void OnSelectionChanged(int versionNameIndex);
-//    public void setStep(int index, ArrayList<Step> steps);
-//    public void setCurrent(int index);
+
 
 }

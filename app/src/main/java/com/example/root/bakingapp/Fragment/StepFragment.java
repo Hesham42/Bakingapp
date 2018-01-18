@@ -1,7 +1,6 @@
 package com.example.root.bakingapp.Fragment;
 
 import android.app.Fragment;
-import android.app.ListFragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -9,8 +8,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 
 import com.example.root.bakingapp.Adapter.IngredientsAdapter;
 import com.example.root.bakingapp.Adapter.StepsAdapter;
@@ -21,7 +18,6 @@ import com.example.root.bakingapp.Utilites.OnVersionNameSelectionChangeListener;
 import com.example.root.bakingapp.Utilites.RecyclerTouchListener;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -29,7 +25,6 @@ import butterknife.ButterKnife;
 /**
  * Created by root on 1/17/18.
  */
-
 public class StepFragment extends Fragment {
     ArrayList<Step> steps = new ArrayList<>();
     ArrayList<Ingredient> ingredients = new ArrayList<>();
@@ -99,7 +94,6 @@ public class StepFragment extends Fragment {
         outState.putParcelableArrayList(getResources().getString(R.string.steps),steps);
         outState.putInt(getResources().getString(R.string.p1),((LinearLayoutManager)ingredientList.getLayoutManager()).findFirstCompletelyVisibleItemPosition());
         outState.putInt(getResources().getString(R.string.p2),((LinearLayoutManager)recycler.getLayoutManager()).findFirstCompletelyVisibleItemPosition());
-
 
     }
 

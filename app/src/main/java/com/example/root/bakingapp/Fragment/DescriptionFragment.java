@@ -94,8 +94,6 @@ public class DescriptionFragment extends Fragment {
         }
         return view;
     }
-
-
     //-------------------------------------------------------------------------
     private void initializePlayer(Uri mediaUri) {
         if (mExoPlayer == null) {
@@ -159,4 +157,9 @@ public class DescriptionFragment extends Fragment {
     }
 
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        releasePlayer();
+    }
 }

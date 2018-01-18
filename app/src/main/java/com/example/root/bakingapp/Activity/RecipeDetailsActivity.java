@@ -13,31 +13,32 @@ import com.example.root.bakingapp.Fragment.StepFragment;
 
 import java.util.ArrayList;
 
-public class RecipeDetailsActivity extends Activity implements OnVersionNameSelectionChangeListener {
-    ArrayList<Step> steps;
-    ArrayList<Ingredient> ingredients;
+public class RecipeDetailsActivity extends Activity implements OnVersionNameSelectionChangeListener
+{
+        ArrayList<Step>steps;
+        ArrayList<Ingredient>ingredients;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        steps = new ArrayList<>();
-        ingredients = new ArrayList<>();
+        steps= new ArrayList<>();
+        ingredients= new ArrayList<>();
         Bundle bundle = new Bundle();
-        bundle = getIntent().getBundleExtra(getResources().getString(R.string.bundle));
-        if (bundle != null) {
-            steps = bundle.getParcelableArrayList(getResources().getString(R.string.steps));
-            ingredients = bundle.getParcelableArrayList(getResources().getString(R.string.ingredients));
+        bundle=getIntent().getBundleExtra(getResources().getString(R.string.bundle));
+        if (bundle!=null){
+            steps=bundle.getParcelableArrayList(getResources().getString(R.string.steps));
+            ingredients=bundle.getParcelableArrayList(getResources().getString(R.string.ingredients));
 
         }
 
         // Check whether the Activity is using the layout verison with the fragment_container
         // FrameLayout and if so we must add the first fragment
-        if (findViewById(R.id.fragment_container) != null) {
+        if (findViewById(R.id.fragment_container) != null){
 
             // However if we are being restored from a previous state, then we don't
             // need to do anything and should return or we could end up with overlapping Fragments
-            if (savedInstanceState != null) {
+            if (savedInstanceState != null){
                 return;
             }
 
@@ -51,29 +52,27 @@ public class RecipeDetailsActivity extends Activity implements OnVersionNameSele
     }
 
 
+
     @Override
     public void OnSelectionChanged(int versionNameIndex) {
-        DescriptionFragment descriptionFragment = new DescriptionFragment();
-        descriptionFragment.setArguments(getIntent().getBundleExtra(getResources().getString(R.string.bundle)));
-        getFragmentManager().beginTransaction()
-                .add(R.id.description_fragment, descriptionFragment)
-                .commit();
+        DescriptionFragment descriptionFragment = (DescriptionFragment) getFragmentManager()
+                .findFragmentById(R.id.description_fragment);
 
-        if (descriptionFragment != null) {
+        if (descriptionFragment != null){
             // If description is available, we are in two pane layout
             // so we call the method in DescriptionFragment to update its content
             descriptionFragment.setDescription(versionNameIndex);
         } else {
             DescriptionFragment newDesriptionFragment = new DescriptionFragment();
             Bundle args = new Bundle();
-
-            args.putInt(DescriptionFragment.KEY_POSITION, versionNameIndex);
+            args.putInt(DescriptionFragment.KEY_POSITION,versionNameIndex);
+            args.putBundle(getResources().getString(R.string.bundle),getIntent().getBundleExtra(getResources().getString(R.string.bundle)));
             newDesriptionFragment.setArguments(args);
             FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
 
             // Replace whatever is in the fragment_container view with this fragment,
             // and add the transaction to the backStack so the User can navigate back
-            fragmentTransaction.replace(R.id.fragment_container, newDesriptionFragment);
+            fragmentTransaction.replace(R.id.fragment_container,newDesriptionFragment);
             fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
         }

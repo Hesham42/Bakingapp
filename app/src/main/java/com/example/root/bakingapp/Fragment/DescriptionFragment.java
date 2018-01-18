@@ -30,11 +30,10 @@ public class DescriptionFragment extends Fragment {
     public final static String KEY_POSITION = "position";
     int mCurrentPosition = -1;
 
-//    @BindView(R.id.)
     TextView mVersionDescriptionTextView;
-     ArrayList<Step> steps=new ArrayList<>();
+    ArrayList<Step> steps = new ArrayList<>();
 
-    public DescriptionFragment(){
+    public DescriptionFragment() {
 
     }
 
@@ -53,18 +52,17 @@ public class DescriptionFragment extends Fragment {
         // If the Activity is recreated, the savedInstanceStare Bundle isn't empty
         // we restore the previous version name selection set by the Bundle.
         // This is necessary when in two pane layout
-        if (savedInstanceState != null){
+        if (savedInstanceState != null) {
             mCurrentPosition = savedInstanceState.getInt(KEY_POSITION);
             steps = savedInstanceState.getParcelableArrayList(getResources().getString(R.string.steps));
 
-        }else{
+        } else {
 
             Bundle extra = getArguments();
-            steps = extra.getParcelableArrayList(getResources().getString(R.string.steps));
+            Bundle bundle =extra.getBundle(getResources().getString(R.string.bundle));
+            steps = bundle.getParcelableArrayList(getResources().getString(R.string.steps));
 
         }
-
-
 
         return view;
     }
@@ -79,17 +77,18 @@ public class DescriptionFragment extends Fragment {
         // applied to the fragment at this point so we can safely call the method below
         // that sets the description text
         Bundle args = getArguments();
-        if (args != null){
+        if (args != null) {
             setDescription(args.getInt(KEY_POSITION));
-            steps = args.getParcelableArrayList(getResources().getString(R.string.steps));
+            Bundle bundle =args.getBundle(getResources().getString(R.string.bundle));
+            steps = bundle.getParcelableArrayList(getResources().getString(R.string.steps));
 
-        } else if(mCurrentPosition != -1){
+        } else if (mCurrentPosition != -1) {
             // Set description based on savedInstanceState defined during onCreateView()
             setDescription(mCurrentPosition);
         }
     }
 
-    public void setDescription(int descriptionIndex){
+    public void setDescription(int descriptionIndex) {
         mVersionDescriptionTextView.setText(steps.get(descriptionIndex).getShortDescription());
         mCurrentPosition = descriptionIndex;
     }
@@ -98,11 +97,10 @@ public class DescriptionFragment extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         // Save the current description selection in case we need to recreate the fragment
-        outState.putInt(KEY_POSITION,mCurrentPosition);
-        outState.putParcelableArrayList(getResources().getString(R.string.steps),steps);
+        outState.putInt(KEY_POSITION, mCurrentPosition);
+        outState.putParcelableArrayList(getResources().getString(R.string.steps), steps);
 
     }
-
 
 
 }

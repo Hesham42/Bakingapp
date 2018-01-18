@@ -7,4 +7,5 @@
     <color name="white">#ffffff</color>
     <color name="dark_gray">#cccccc</color>
     <color name="black">#000000</color>
+    <color name="bgBottomNavigation">#fe485a</color>
 </resources>

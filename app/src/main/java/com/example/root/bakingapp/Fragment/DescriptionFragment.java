@@ -42,8 +42,6 @@ public class DescriptionFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
     }
-
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_description, container, false);

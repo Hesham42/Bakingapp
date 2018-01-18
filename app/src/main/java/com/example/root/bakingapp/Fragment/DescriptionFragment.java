@@ -20,6 +20,7 @@ import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.LoadControl;
 import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.dash.DashMediaSource;
@@ -53,19 +54,9 @@ public class DescriptionFragment extends Fragment {
 
     public final static String KEY_POSITION = "position";
     int mCurrentPosition = -1;
-    SimpleExoPlayerView simpleExoPlayerView;
-    SimpleExoPlayer player;
-    Handler mainHandler;
-    TrackSelection.Factory videoTrackSelectionFactory;
-    TrackSelector trackSelector;
-    LoadControl loadControl;
-    DataSource.Factory dataSourceFactory;
-    MediaSource videoSource;
-    Uri uri;
+    private SimpleExoPlayer mExoPlayer;
+    private SimpleExoPlayerView mPlayerView;
     String userAgent;
-    static final DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
-    private static final String VIDEO_URI =
-            "https://www.youtube.com/watch?v=HZuWeJ_Sa5A";
 
 
     TextView mVersionDescriptionTextView;
@@ -86,8 +77,7 @@ public class DescriptionFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_description, container, false);
         mVersionDescriptionTextView = (TextView) view.findViewById(R.id.version_description);
-        simpleExoPlayerView = (SimpleExoPlayerView)view.findViewById(R.id.player_view);
-
+        mPlayerView = (SimpleExoPlayerView) view.findViewById(R.id.player_view);
         // If the Activity is recreated, the savedInstanceStare Bundle isn't empty
         // we restore the previous version name selection set by the Bundle.
         // This is necessary when in two pane layout
@@ -102,56 +92,33 @@ public class DescriptionFragment extends Fragment {
             steps = bundle.getParcelableArrayList(getResources().getString(R.string.steps));
 
         }
-        createPlayer();
-        attachPlayerView();
-        preparePlayer();
         return view;
     }
 
 
     //-------------------------------------------------------------------------
-// Create TrackSelection Factory, Track Selector, Handler, Load Control, and ExoPlayer Instance
-    public void createPlayer() {
-        mainHandler = new Handler();
-        videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(bandwidthMeter);
-        trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
-        loadControl = new DefaultLoadControl();
-        player = ExoPlayerFactory.newSimpleInstance(getActivity(), trackSelector, loadControl);
+    private void initializePlayer(Uri mediaUri) {
+        if (mExoPlayer == null) {
+            // Create an instance of the ExoPlayer.
+            TrackSelector trackSelector = new DefaultTrackSelector();
+            LoadControl loadControl = new DefaultLoadControl();
+            mExoPlayer = ExoPlayerFactory.newSimpleInstance(getActivity(), trackSelector, loadControl);
+            mPlayerView.setPlayer(mExoPlayer);
+            // Prepare the MediaSource.
+            String userAgent = Util.getUserAgent(getActivity(), "Baking app");
+            MediaSource mediaSource = new ExtractorMediaSource(mediaUri, new DefaultDataSourceFactory(
+                    getActivity(), userAgent), new DefaultExtractorsFactory(), null, null);
+            mExoPlayer.prepare(mediaSource);
+            mExoPlayer.setPlayWhenReady(true);
+        }
     }
-
-    // Set player to SimpleExoPlayerView
-    public void attachPlayerView() {
-        simpleExoPlayerView.setPlayer(player);
-    }
-
-    // Build Data Source Factory, Dash Media Source, and Prepare player using videoSource
-    public void preparePlayer() {
-        uriParse();
-        dataSourceFactory = buildDataSourceFactory(bandwidthMeter);
-        videoSource = new DashMediaSource(uri, buildDataSourceFactory(null), new DefaultDashChunkSource.Factory(dataSourceFactory), mainHandler, null);
-        player.prepare(videoSource);
-    }
-
-    // Parse VIDEO_URI and Save at uri variable
-    public void uriParse() {
-        uri = Uri.parse(VIDEO_URI);
-    }
-
-    // Build Data Source Factory using DefaultBandwidthMeter and HttpDataSource.Factory
-    private DataSource.Factory buildDataSourceFactory(DefaultBandwidthMeter bandwidthMeter) {
-        return new DefaultDataSourceFactory(getActivity(), bandwidthMeter, buildHttpDataSourceFactory(bandwidthMeter));
-    }
-
-    // Build Http Data Source Factory using DefaultBandwidthMeter
-    private HttpDataSource.Factory buildHttpDataSourceFactory(DefaultBandwidthMeter bandwidthMeter) {
-        return new DefaultHttpDataSourceFactory(userAgent, bandwidthMeter);
-    }
-
-    // Activity onStop, player must be release because of memory saving
-    @Override
-    public void onStop() {
-        super.onStop();
-        player.release();
+    /**
+     * Release ExoPlayer.
+     */
+    private void releasePlayer() {
+        mExoPlayer.stop();
+        mExoPlayer.release();
+        mExoPlayer = null;
     }
 
 //  ------------------------------------------------------------------------
@@ -179,8 +146,7 @@ public class DescriptionFragment extends Fragment {
     public void setDescription(int descriptionIndex) {
         mVersionDescriptionTextView.setText(steps.get(descriptionIndex).getShortDescription());
         mCurrentPosition = descriptionIndex;
-        userAgent = Util.getUserAgent(getActivity(),"SimpleDashExoPlayer");
-
+        initializePlayer(Uri.parse(steps.get(descriptionIndex).getVideoURL()));
     }
 
     @Override

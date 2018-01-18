@@ -3,13 +3,23 @@ package com.example.root.bakingapp.Fragment;
 
 import android.app.Fragment;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.example.root.bakingapp.Pojo.Recipe;
+import com.example.root.bakingapp.Pojo.Step;
 import com.example.root.bakingapp.R;
+import com.example.root.bakingapp.Service.COMM;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import retrofit2.Response;
 
 /**
  * Created by root on 1/17/18.
@@ -20,8 +30,9 @@ public class DescriptionFragment extends Fragment {
     public final static String KEY_POSITION = "position";
     int mCurrentPosition = -1;
 
-    String[] mVersionDescriptions;
+//    @BindView(R.id.)
     TextView mVersionDescriptionTextView;
+     ArrayList<Step> steps=new ArrayList<>();
 
     public DescriptionFragment(){
 
@@ -31,25 +42,30 @@ public class DescriptionFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        mVersionDescriptions = getResources()
-                .getStringArray(R.array.version_descriptions);
     }
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_description, container, false);
+        mVersionDescriptionTextView = (TextView) view.findViewById(R.id.version_description);
 
         // If the Activity is recreated, the savedInstanceStare Bundle isn't empty
         // we restore the previous version name selection set by the Bundle.
         // This is necessary when in two pane layout
         if (savedInstanceState != null){
             mCurrentPosition = savedInstanceState.getInt(KEY_POSITION);
+            steps = savedInstanceState.getParcelableArrayList(getResources().getString(R.string.steps));
+
+        }else{
+
+            Bundle extra = getArguments();
+            steps = extra.getParcelableArrayList(getResources().getString(R.string.steps));
+
         }
 
 
-        View view = inflater.inflate(R.layout.fragment_description, container, false);
 
-        mVersionDescriptionTextView = (TextView) view.findViewById(R.id.version_description);
         return view;
     }
 
@@ -64,8 +80,9 @@ public class DescriptionFragment extends Fragment {
         // that sets the description text
         Bundle args = getArguments();
         if (args != null){
-            // Set description based on argument passed in
             setDescription(args.getInt(KEY_POSITION));
+            steps = args.getParcelableArrayList(getResources().getString(R.string.steps));
+
         } else if(mCurrentPosition != -1){
             // Set description based on savedInstanceState defined during onCreateView()
             setDescription(mCurrentPosition);
@@ -73,15 +90,19 @@ public class DescriptionFragment extends Fragment {
     }
 
     public void setDescription(int descriptionIndex){
-        mVersionDescriptionTextView.setText(mVersionDescriptions[descriptionIndex]);
+        mVersionDescriptionTextView.setText(steps.get(descriptionIndex).getShortDescription());
         mCurrentPosition = descriptionIndex;
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-
         // Save the current description selection in case we need to recreate the fragment
         outState.putInt(KEY_POSITION,mCurrentPosition);
+        outState.putParcelableArrayList(getResources().getString(R.string.steps),steps);
+
     }
+
+
+
 }

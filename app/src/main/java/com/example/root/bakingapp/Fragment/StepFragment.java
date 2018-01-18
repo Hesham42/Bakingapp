@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import com.example.root.bakingapp.Adapter.IngredientsAdapter;
 import com.example.root.bakingapp.Adapter.StepsAdapter;
 import com.example.root.bakingapp.Pojo.Ingredient;
+import com.example.root.bakingapp.Pojo.Recipe;
 import com.example.root.bakingapp.Pojo.Step;
 import com.example.root.bakingapp.R;
 import com.example.root.bakingapp.Utilites.OnVersionNameSelectionChangeListener;
@@ -57,7 +58,8 @@ public class StepFragment extends Fragment {
 
         if (savedInstanceState == null) {
             Bundle extra = getArguments();
-            ingredients = extra.getParcelableArrayList(getResources().getString(R.string.ingredients));
+            ingredients =
+                    extra.getParcelableArrayList(getResources().getString(R.string.ingredients));
             steps = extra.getParcelableArrayList(getResources().getString(R.string.steps));
         }else{
             ingredients = savedInstanceState.getParcelableArrayList(getResources().getString(R.string.ingredients));
@@ -86,7 +88,6 @@ public class StepFragment extends Fragment {
 
         return root;
     }
-
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -97,4 +98,9 @@ public class StepFragment extends Fragment {
 
     }
 
+    public void setRecipes(int versionNameIndex, ArrayList<Step> steps, ArrayList<Ingredient> ingredients) {
+    this.steps=steps;
+    this.ingredients=ingredients;
+
+    }
 }

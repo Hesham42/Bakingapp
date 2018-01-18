@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
@@ -24,7 +25,9 @@ import android.widget.Toast;
 import com.example.root.bakingapp.Adapter.RecipesAdapter;
 import com.example.root.bakingapp.InternetConnection.ConnectivityReceiver;
 import com.example.root.bakingapp.InternetConnection.MyApplication;
+import com.example.root.bakingapp.Pojo.Ingredient;
 import com.example.root.bakingapp.Pojo.Recipe;
+import com.example.root.bakingapp.Pojo.Step;
 import com.example.root.bakingapp.R;
 import com.example.root.bakingapp.Service.COMM;
 import com.example.root.bakingapp.Service.Client;
@@ -95,7 +98,6 @@ public class HomeActivity extends AppCompatActivity implements COMM, Connectivit
         super.onResume();
         MyApplication.getInstance().setConnectivityListener(this);
     }
-
     private void SizeLayout_Fun() {
         DisplayMetrics metrics = new DisplayMetrics();
         HomeActivity.this.getWindowManager().getDefaultDisplay().getMetrics(metrics);
@@ -131,7 +133,14 @@ public class HomeActivity extends AppCompatActivity implements COMM, Connectivit
         recyclerView.addOnItemTouchListener(new RecyclerTouchListener(HomeActivity.this, recyclerView, new RecyclerTouchListener.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
+                Bundle bundle = new Bundle();
+                bundle.putParcelableArrayList(getResources().getString(R.string.steps),
+                        (ArrayList<? extends Parcelable>) recipes.get(position).getSteps());
+                bundle.putParcelableArrayList(getResources().getString(R.string.ingredients),
+                        (ArrayList<? extends Parcelable>) recipes.get(position).getIngredients());
+                bundle.putString(getResources().getString(R.string.recipe_name), recipes.get(position).getName());
                 Intent intent = new Intent(HomeActivity.this, RecipeDetailsActivity.class);
+                intent.putExtra(getResources().getString(R.string.bundle), bundle);
                 startActivity(intent);
 
             }
@@ -147,14 +156,14 @@ public class HomeActivity extends AppCompatActivity implements COMM, Connectivit
     @Override
     public void onFailure(String message) {
         Toast.makeText(HomeActivity.this, "No internet connection !", Toast.LENGTH_SHORT).show();
-
+        fab.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void onResponse(Response<List<Recipe>> response) {
         recipes = (ArrayList<Recipe>) response.body();
         recyclerView.setAdapter(new RecipesAdapter(HomeActivity.this, recipes));
-
+        fab.setVisibility(View.GONE);
     }
 
 
@@ -171,7 +180,10 @@ public class HomeActivity extends AppCompatActivity implements COMM, Connectivit
                     LinearLayoutManager.VERTICAL,
                     false);
             recyclerView.setLayoutManager(linearLayoutManager);
+            SizeLayout_Fun();
         }
+
+
 
         recyclerView.setAdapter(new RecipesAdapter(HomeActivity.this, recipes));
     }

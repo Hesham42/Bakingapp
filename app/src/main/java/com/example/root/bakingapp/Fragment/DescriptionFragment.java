@@ -52,12 +52,10 @@ import retrofit2.Response;
  */
 
 public class DescriptionFragment extends Fragment {
-
     public final static String KEY_POSITION = "position";
     int mCurrentPosition = -1;
     private SimpleExoPlayer mExoPlayer;
     private SimpleExoPlayerView mPlayerView;
-    String userAgent;
 
 
     TextView mVersionDescriptionTextView;

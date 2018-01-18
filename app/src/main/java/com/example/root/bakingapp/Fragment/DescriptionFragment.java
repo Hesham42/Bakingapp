@@ -5,19 +5,13 @@ package com.example.root.bakingapp.Fragment;
 import android.app.Fragment;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Parcelable;
-import android.support.annotation.Nullable;
-import android.support.design.widget.BottomNavigationView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.example.root.bakingapp.Pojo.Recipe;
 import com.example.root.bakingapp.Pojo.Step;
 import com.example.root.bakingapp.R;
-import com.example.root.bakingapp.Service.COMM;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlayerFactory;
@@ -26,28 +20,13 @@ import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
-import com.google.android.exoplayer2.source.dash.DashMediaSource;
-import com.google.android.exoplayer2.source.dash.DefaultDashChunkSource;
-import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
-import com.google.android.exoplayer2.upstream.BandwidthMeter;
-import com.google.android.exoplayer2.upstream.DataSource;
-import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
-import com.google.android.exoplayer2.upstream.HttpDataSource;
 import com.google.android.exoplayer2.util.Util;
 
 import java.util.ArrayList;
-import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import retrofit2.Response;
 
 /**
  * Created by root on 1/17/18.
@@ -55,13 +34,16 @@ import retrofit2.Response;
 
 public class DescriptionFragment extends Fragment {
     public final static String KEY_POSITION = "position";
+    private static final String SELECTED_POSITION ="vedioPostion" ;
     int mCurrentPosition = -1;
-    private SimpleExoPlayer mExoPlayer;
+    private SimpleExoPlayer player;
     private SimpleExoPlayerView mPlayerView;
 
 
     TextView mVersionDescriptionTextView;
     ArrayList<Step> steps = new ArrayList<>();
+    private long positionVideo;
+    private Uri videoUri=null;
 
     public DescriptionFragment() {
 
@@ -73,7 +55,6 @@ public class DescriptionFragment extends Fragment {
 
     }
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_description, container, false);
@@ -83,10 +64,11 @@ public class DescriptionFragment extends Fragment {
         // If the Activity is recreated, the savedInstanceStare Bundle isn't empty
         // we restore the previous version name selection set by the Bundle.
         // This is necessary when in two pane layout
+        positionVideo = C.TIME_UNSET;
         if (savedInstanceState != null) {
             mCurrentPosition = savedInstanceState.getInt(KEY_POSITION);
             steps = savedInstanceState.getParcelableArrayList(getResources().getString(R.string.steps));
-
+            positionVideo = savedInstanceState.getLong(SELECTED_POSITION, C.TIME_UNSET);
         } else {
 
             Bundle extra = getArguments();
@@ -98,30 +80,36 @@ public class DescriptionFragment extends Fragment {
     }
     //-------------------------------------------------------------------------
     private void initializePlayer(Uri mediaUri) {
-        if (mExoPlayer == null) {
+        if (player == null) {
             // Create an instance of the ExoPlayer.
             TrackSelector trackSelector = new DefaultTrackSelector();
             LoadControl loadControl = new DefaultLoadControl();
-            mExoPlayer = ExoPlayerFactory.newSimpleInstance(getActivity(), trackSelector, loadControl);
-            mPlayerView.setPlayer(mExoPlayer);
+            player = ExoPlayerFactory.newSimpleInstance(getActivity(), trackSelector, loadControl);
+            mPlayerView.setPlayer(player);
             // Prepare the MediaSource.
             String userAgent = Util.getUserAgent(getActivity(), "Baking app");
             MediaSource mediaSource = new ExtractorMediaSource(mediaUri, new DefaultDataSourceFactory(
                     getActivity(), userAgent), new DefaultExtractorsFactory(), null, null);
-            mExoPlayer.prepare(mediaSource);
-            mExoPlayer.setPlayWhenReady(true);
+            player.prepare(mediaSource);
+            player.setPlayWhenReady(true);
         }
     }
     /**
      * Release ExoPlayer.
      */
     private void releasePlayer() {
-        mExoPlayer.stop();
-        mExoPlayer.release();
-        mExoPlayer = null;
+        player.stop();
+        player.release();
+        player = null;
+    }
+//
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        releasePlayer();
     }
 
-//  ------------------------------------------------------------------------
+    //  ------------------------------------------------------------------------
 
     @Override
     public void onStart() {
@@ -146,7 +134,8 @@ public class DescriptionFragment extends Fragment {
     public void setDescription(int descriptionIndex) {
         mVersionDescriptionTextView.setText(steps.get(descriptionIndex).getShortDescription());
         mCurrentPosition = descriptionIndex;
-        initializePlayer(Uri.parse(steps.get(descriptionIndex).getVideoURL()));
+        videoUri=Uri.parse(steps.get(descriptionIndex).getVideoURL());
+        initializePlayer(videoUri);
     }
 
     @Override
@@ -155,13 +144,11 @@ public class DescriptionFragment extends Fragment {
         // Save the current description selection in case we need to recreate the fragment
         outState.putInt(KEY_POSITION, mCurrentPosition);
         outState.putParcelableArrayList(getResources().getString(R.string.steps), steps);
+        positionVideo = player.getCurrentPosition(); //then, save it on the bundle.
+        outState.putLong(SELECTED_POSITION, positionVideo);
 
     }
 
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        releasePlayer();
-    }
+
 }

@@ -65,7 +65,7 @@ public class DescriptionFragment extends Fragment {
     String userAgent;
     static final DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
     private static final String VIDEO_URI =
-            "http://www-itec.uni-klu.ac.at/ftp/datasets/DASHDataset2014/BigBuckBunny/4sec/BigBuckBunny_4s_onDemand_2014_05_09.mpd";
+            "https://www.youtube.com/watch?v=HZuWeJ_Sa5A";
 
 
     TextView mVersionDescriptionTextView;

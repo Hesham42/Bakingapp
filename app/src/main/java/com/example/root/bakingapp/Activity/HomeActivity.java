@@ -93,7 +93,7 @@ public class HomeActivity extends AppCompatActivity implements COMM,
             message = "Sorry! Not connected to internet";
         }
 
-        Toast.makeText(this,message, Toast.LENGTH_LONG).show();
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -101,6 +101,7 @@ public class HomeActivity extends AppCompatActivity implements COMM,
         super.onResume();
         MyApplication.getInstance().setConnectivityListener(this);
     }
+
     private void SizeLayout_Fun() {
         DisplayMetrics metrics = new DisplayMetrics();
         HomeActivity.this.getWindowManager().getDefaultDisplay().getMetrics(metrics);
@@ -185,7 +186,6 @@ public class HomeActivity extends AppCompatActivity implements COMM,
             recyclerView.setLayoutManager(linearLayoutManager);
             SizeLayout_Fun();
         }
-
 
 
         recyclerView.setAdapter(new RecipesAdapter(HomeActivity.this, recipes));

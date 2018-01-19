@@ -7,7 +7,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -16,7 +18,6 @@ import com.example.root.bakingapp.Pojo.Recipe;
 import com.example.root.bakingapp.R;
 import com.example.root.bakingapp.Service.COMM;
 import com.example.root.bakingapp.Service.Client;
-import com.mukesh.tinydb.TinyDB;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,38 +32,34 @@ public class WidgetActivity extends Activity implements COMM {
     int mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
     ProgressDialog dialog;
     private ArrayList<Recipe> recipes;
-    private Spinner spinner;
-    View.OnClickListener mOnClickListener =
-            new View.OnClickListener() {
-                public void onClick(View v) {
-                    final Context context = WidgetActivity.this;
-
-                    int position=spinner.getSelectedItemPosition();
-
-                    WidgetModel model=new WidgetModel(recipes.get(position).getName(),
-                            (ArrayList<Ingredient>) recipes.get(position).getIngredients());
-                    WidgetProvider.DB.putObject(String.valueOf(mAppWidgetId),model);
-                    AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-                    WidgetProvider.updateAppWidget(context, appWidgetManager, mAppWidgetId);
-                    Intent resultValue = new Intent();
-                    resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
-                    setResult(RESULT_OK, resultValue);
-                    finish();
-                }
-            };
+    private ListView listView;
 
     @Override
     public void onCreate(Bundle state) {
         super.onCreate(state);
         setResult(RESULT_CANCELED);
         setContentView(R.layout.recipe_widget_configure);
-        spinner= (Spinner) findViewById(R.id.spinner);
+        listView = (ListView) findViewById(R.id.spinner);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                final Context context = WidgetActivity.this;
+                WidgetModel model=new WidgetModel(recipes.get(position).getName(),
+                        (ArrayList<Ingredient>) recipes.get(position).getIngredients());
+                WidgetProvider.DB.putObject(String.valueOf(mAppWidgetId),model);
+                AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+                WidgetProvider.updateAppWidget(context, appWidgetManager, mAppWidgetId);
+                Intent resultValue = new Intent();
+                resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
+                setResult(RESULT_OK, resultValue);
+                finish();
+            }
+        });
 
         dialog = new ProgressDialog(this);
         dialog.setMessage("Loading");
         dialog.setCancelable(false);
         dialog.show();
-        findViewById(R.id.add_button).setOnClickListener(mOnClickListener);
 
 
         Intent intent = getIntent();
@@ -98,10 +95,10 @@ public class WidgetActivity extends Activity implements COMM {
             values[i]=recipes.get(i).getName();
         }
 
-        ArrayAdapter<String> spinnerArrayAdapter =
-                new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, values);
-        spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(spinnerArrayAdapter);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_list_item_1,
+                values);
+         listView.setAdapter(adapter);
     }
 
     }

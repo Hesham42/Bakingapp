@@ -33,6 +33,7 @@ import com.example.root.bakingapp.Service.COMM;
 import com.example.root.bakingapp.Service.Client;
 import com.example.root.bakingapp.Utilites.NetworkStateChangeReceiver;
 import com.example.root.bakingapp.Utilites.RecyclerTouchListener;
+import com.mukesh.tinydb.TinyDB;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +44,8 @@ import retrofit2.Response;
 
 import static com.example.root.bakingapp.Utilites.NetworkStateChangeReceiver.IS_NETWORK_AVAILABLE;
 
-public class HomeActivity extends AppCompatActivity implements COMM, ConnectivityReceiver.ConnectivityReceiverListener {
+public class HomeActivity extends AppCompatActivity implements COMM,
+        ConnectivityReceiver.ConnectivityReceiverListener {
     ArrayList<Recipe> recipes;
     @BindView(R.id.recipesList)
     RecyclerView recyclerView;
@@ -51,6 +53,7 @@ public class HomeActivity extends AppCompatActivity implements COMM, Connectivit
     FloatingActionButton fab;
     GridLayoutManager gridLayoutManager;
     LinearLayoutManager linearLayoutManager;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

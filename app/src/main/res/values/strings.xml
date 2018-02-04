@@ -11,6 +11,7 @@
     <string name="recipes">recipes</string>
     <string name="position">position</string>
     <string name="tablet">tablet</string>
+    <string name="phone">phone</string>
     <string name="steps">steps</string>
     <string name="ingredients">ingredients</string>
     <string name="bundle">bundle</string>

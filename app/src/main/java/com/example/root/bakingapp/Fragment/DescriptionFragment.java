@@ -5,11 +5,14 @@ package com.example.root.bakingapp.Fragment;
 import android.app.Fragment;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.example.root.bakingapp.Pojo.Step;
 import com.example.root.bakingapp.R;
 import com.google.android.exoplayer2.C;
@@ -25,8 +28,13 @@ import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+
+import butterknife.BindView;
+
+import static android.view.View.GONE;
 
 /**
  * Created by root on 1/17/18.
@@ -34,16 +42,18 @@ import java.util.ArrayList;
 
 public class DescriptionFragment extends Fragment {
     public final static String KEY_POSITION = "position";
-    private static final String SELECTED_POSITION ="vedioPostion" ;
+    private static final String SELECTED_POSITION = "vedioPostion";
     int mCurrentPosition = -1;
     private SimpleExoPlayer player;
     private SimpleExoPlayerView mPlayerView;
-
-
+    ImageView ImgthumbnailUrl;
+    TextView current;
+    FloatingActionButton next;
+    FloatingActionButton back;
     TextView mVersionDescriptionTextView;
     ArrayList<Step> steps = new ArrayList<>();
     private long positionVideo;
-    private Uri videoUri=null;
+
 
     public DescriptionFragment() {
 
@@ -60,10 +70,10 @@ public class DescriptionFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_description, container, false);
         mVersionDescriptionTextView = (TextView) view.findViewById(R.id.version_description);
         mPlayerView = (SimpleExoPlayerView) view.findViewById(R.id.player_view);
-
-        // If the Activity is recreated, the savedInstanceStare Bundle isn't empty
-        // we restore the previous version name selection set by the Bundle.
-        // This is necessary when in two pane layout
+        next = view.findViewById(R.id.next_button);
+        back = view.findViewById(R.id.back_button);
+        current = view.findViewById(R.id.currentStep);
+        ImgthumbnailUrl = view.findViewById(R.id.thumbnailUrl);
         positionVideo = C.TIME_UNSET;
         if (savedInstanceState != null) {
             mCurrentPosition = savedInstanceState.getInt(KEY_POSITION);
@@ -73,11 +83,79 @@ public class DescriptionFragment extends Fragment {
 
             Bundle extra = getArguments();
             Bundle bundle = extra.getBundle(getResources().getString(R.string.bundle));
+            mCurrentPosition=extra.getInt(KEY_POSITION);
             steps = bundle.getParcelableArrayList(getResources().getString(R.string.steps));
 
         }
+
+        back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mCurrentPosition == 0 || mCurrentPosition == -1) {
+
+                } else {
+                    mCurrentPosition--;
+                    View_fun();
+                }
+
+            }
+        });
+
+
+        next.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mCurrentPosition == steps.size() - 1) {
+
+                } else {
+
+                    mCurrentPosition++;
+                    View_fun();
+
+                }
+            }
+        });
+
+        View_fun();
         return view;
     }
+
+    private void View_fun() {
+        if (mCurrentPosition <= 0) {
+            back.setVisibility(GONE);
+        } else {
+            back.setVisibility(View.VISIBLE);
+        }
+        if (mCurrentPosition >= steps.size() - 1) {
+            next.setVisibility(View.GONE);
+        } else {
+            next.setVisibility(View.VISIBLE);
+        }
+        releasePlayer();
+        if (steps.get(mCurrentPosition).getVideoURL().isEmpty()
+                && steps.get(mCurrentPosition).getThumbnailURL().isEmpty()) {
+            mPlayerView.setVisibility(GONE);
+            ImgthumbnailUrl.setVisibility(GONE);
+        } else if (!steps.get(mCurrentPosition).getVideoURL().isEmpty()) {
+            String videoUrl = steps.get(mCurrentPosition).getVideoURL();
+            ImgthumbnailUrl.setVisibility(GONE);
+            mPlayerView.setVisibility(View.VISIBLE);
+            initializePlayer(Uri.parse(videoUrl));
+
+        } else {
+            String imageUrl = steps.get(mCurrentPosition).getThumbnailURL();
+            mPlayerView.setVisibility(GONE);
+            ImgthumbnailUrl.setVisibility(View.VISIBLE);
+
+            Glide.with(getActivity())
+                    .load(imageUrl)
+                    .into(ImgthumbnailUrl);
+        }
+        mVersionDescriptionTextView.setText(steps.get(mCurrentPosition).getShortDescription());
+        current.setText((mCurrentPosition + 1) + "/" + steps.size());
+
+    }
+
     //-------------------------------------------------------------------------
     private void initializePlayer(Uri mediaUri) {
         if (player == null) {
@@ -86,23 +164,28 @@ public class DescriptionFragment extends Fragment {
             LoadControl loadControl = new DefaultLoadControl();
             player = ExoPlayerFactory.newSimpleInstance(getActivity(), trackSelector, loadControl);
             mPlayerView.setPlayer(player);
+            player.seekTo(positionVideo);
             // Prepare the MediaSource.
             String userAgent = Util.getUserAgent(getActivity(), "Baking app");
             MediaSource mediaSource = new ExtractorMediaSource(mediaUri, new DefaultDataSourceFactory(
                     getActivity(), userAgent), new DefaultExtractorsFactory(), null, null);
             player.prepare(mediaSource);
             player.setPlayWhenReady(true);
+
         }
     }
+
     /**
      * Release ExoPlayer.
      */
     private void releasePlayer() {
-        player.stop();
-        player.release();
-        player = null;
+        if (player != null) {
+            player.release();
+            player = null;
+        }
     }
-//
+
+    //
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -122,6 +205,7 @@ public class DescriptionFragment extends Fragment {
         Bundle args = getArguments();
         if (args != null) {
             setDescription(args.getInt(KEY_POSITION));
+            mCurrentPosition=args.getInt(KEY_POSITION);
             Bundle bundle = args.getBundle(getResources().getString(R.string.bundle));
             steps = bundle.getParcelableArrayList(getResources().getString(R.string.steps));
 
@@ -134,9 +218,10 @@ public class DescriptionFragment extends Fragment {
     public void setDescription(int descriptionIndex) {
         mVersionDescriptionTextView.setText(steps.get(descriptionIndex).getShortDescription());
         mCurrentPosition = descriptionIndex;
-        videoUri=Uri.parse(steps.get(descriptionIndex).getVideoURL());
-        initializePlayer(videoUri);
+        View_fun();
+
     }
+
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -148,7 +233,6 @@ public class DescriptionFragment extends Fragment {
         outState.putLong(SELECTED_POSITION, positionVideo);
 
     }
-
 
 
 }

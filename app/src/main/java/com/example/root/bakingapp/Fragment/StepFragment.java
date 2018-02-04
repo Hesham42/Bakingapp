@@ -27,16 +27,15 @@ import butterknife.ButterKnife;
  * Created by root on 1/17/18.
  */
 public class StepFragment extends Fragment {
+    int index;
     ArrayList<Step> steps = new ArrayList<>();
     ArrayList<Ingredient> ingredients = new ArrayList<>();
     @BindView(R.id.stepsList)
     RecyclerView recycler;
     @BindView(R.id.ingredientList)
     RecyclerView ingredientList;
-    // Mandatory empty constructor for the fragment manager to instantiate the fragment
-    String[] stringArrayList;
     LinearLayoutManager ingredientsManager, stepsManager;
-
+    int p1, p2;
     public StepFragment() {
 
     }
@@ -64,15 +63,29 @@ public class StepFragment extends Fragment {
         }else{
             ingredients = savedInstanceState.getParcelableArrayList(getResources().getString(R.string.ingredients));
             steps = savedInstanceState.getParcelableArrayList(getResources().getString(R.string.steps));
+            p1 =savedInstanceState.getInt(getResources().getString(R.string.p1));
+            p2 =savedInstanceState.getInt(getResources().getString(R.string.p2));
         }
-        ingredientsManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
-        stepsManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
+        ingredientsManager = new LinearLayoutManager(getActivity(),
+                LinearLayoutManager.VERTICAL,
+                false);
+        stepsManager = new LinearLayoutManager(getActivity(),
+                LinearLayoutManager.VERTICAL,
+                false);
         ingredientList.setLayoutManager(ingredientsManager);
         ingredientList.setAdapter(new IngredientsAdapter(getActivity(), ingredients));
+          if(p1 !=0)
+        {
+            ingredientList.getLayoutManager().scrollToPosition(p1);
+        }
         recycler.setLayoutManager(stepsManager);
         recycler.setAdapter(new StepsAdapter(getActivity(), steps));
-
-        recycler.addOnItemTouchListener(new RecyclerTouchListener(getActivity(), recycler, new RecyclerTouchListener.OnItemClickListener() {
+        if(p2 !=0)
+        {
+            recycler.getLayoutManager().scrollToPosition(p2);
+        }
+        recycler.addOnItemTouchListener(new RecyclerTouchListener(getActivity(),
+                recycler, new RecyclerTouchListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
                         OnVersionNameSelectionChangeListener listener = (OnVersionNameSelectionChangeListener) getActivity();
@@ -95,12 +108,13 @@ public class StepFragment extends Fragment {
         outState.putParcelableArrayList(getResources().getString(R.string.steps),steps);
         outState.putInt(getResources().getString(R.string.p1),((LinearLayoutManager)ingredientList.getLayoutManager()).findFirstCompletelyVisibleItemPosition());
         outState.putInt(getResources().getString(R.string.p2),((LinearLayoutManager)recycler.getLayoutManager()).findFirstCompletelyVisibleItemPosition());
-
-    }
+     }
 
     public void setRecipes(int versionNameIndex, ArrayList<Step> steps, ArrayList<Ingredient> ingredients) {
     this.steps=steps;
     this.ingredients=ingredients;
-
+    this.index=versionNameIndex;
+    OnVersionNameSelectionChangeListener listener = (OnVersionNameSelectionChangeListener) getActivity();
+    listener.OnSelectionChanged(versionNameIndex);
     }
 }

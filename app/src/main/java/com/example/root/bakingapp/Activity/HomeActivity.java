@@ -1,5 +1,6 @@
 package com.example.root.bakingapp.Activity;
 
+import android.app.Fragment;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -7,8 +8,11 @@ import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
+import android.support.annotation.VisibleForTesting;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.test.espresso.idling.CountingIdlingResource;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -23,6 +27,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.root.bakingapp.Adapter.RecipesAdapter;
+import com.example.root.bakingapp.Fragment.StepFragment;
 import com.example.root.bakingapp.InternetConnection.ConnectivityReceiver;
 import com.example.root.bakingapp.InternetConnection.MyApplication;
 import com.example.root.bakingapp.Pojo.Ingredient;
@@ -51,8 +56,8 @@ public class HomeActivity extends AppCompatActivity implements COMM,
     RecyclerView recyclerView;
     @BindView(R.id.fab)
     FloatingActionButton fab;
-    GridLayoutManager gridLayoutManager;
-    LinearLayoutManager linearLayoutManager;
+    int position = 0;
+    private CountingIdlingResource mIdlingResource = new CountingIdlingResource("Loading_Data");
 
 
     @Override
@@ -60,7 +65,6 @@ public class HomeActivity extends AppCompatActivity implements COMM,
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipes);
         ButterKnife.bind(this);
-        SizeLayout_Fun();
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -68,13 +72,31 @@ public class HomeActivity extends AppCompatActivity implements COMM,
                 checkConnection();
             }
         });
+        mIdlingResource.increment();
 
         if (savedInstanceState == null) {
-
-            recyclerView.setHasFixedSize(true);
+            mIdlingResource.increment();
             Client.getRecipes(HomeActivity.this);
         }
         OnClickELement();
+
+    }
+
+    private void SizeLayout_Fun() {
+        if (recyclerView.getTag().equals(getResources().getString(R.string.tablet))) {
+            GridLayoutManager gridLayoutManager =
+                    new GridLayoutManager(HomeActivity.this, 3);
+            recyclerView.setLayoutManager(gridLayoutManager);
+        } else {
+
+            LinearLayoutManager gridLayoutManager =
+                    new LinearLayoutManager(HomeActivity.this, LinearLayoutManager.VERTICAL, false);
+            recyclerView.setLayoutManager(gridLayoutManager);
+
+        }
+        recyclerView.setAdapter(new RecipesAdapter(HomeActivity.this, recipes));
+        recyclerView.getLayoutManager().scrollToPosition(position);
+        mIdlingResource.decrement();
 
 
     }
@@ -102,24 +124,6 @@ public class HomeActivity extends AppCompatActivity implements COMM,
         MyApplication.getInstance().setConnectivityListener(this);
     }
 
-    private void SizeLayout_Fun() {
-        DisplayMetrics metrics = new DisplayMetrics();
-        HomeActivity.this.getWindowManager().getDefaultDisplay().getMetrics(metrics);
-        float yInches = metrics.heightPixels / metrics.ydpi;
-        float xInches = metrics.widthPixels / metrics.xdpi;
-        double diagonalInches = Math.sqrt(xInches * xInches + yInches * yInches);
-        if (diagonalInches >= 6.5) {
-            gridLayoutManager = new GridLayoutManager(HomeActivity.this,
-                    3);
-            recyclerView.setLayoutManager(gridLayoutManager);
-
-        } else {
-            linearLayoutManager = new LinearLayoutManager(HomeActivity.this,
-                    LinearLayoutManager.VERTICAL,
-                    false);
-            recyclerView.setLayoutManager(linearLayoutManager);
-        }
-    }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -131,6 +135,9 @@ public class HomeActivity extends AppCompatActivity implements COMM,
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         recipes = savedInstanceState.getParcelableArrayList(getResources().getString(R.string.recipes));
+        SizeLayout_Fun();
+
+
     }
 
     private void OnClickELement() {
@@ -168,31 +175,20 @@ public class HomeActivity extends AppCompatActivity implements COMM,
         recipes = (ArrayList<Recipe>) response.body();
         recyclerView.setAdapter(new RecipesAdapter(HomeActivity.this, recipes));
         fab.setVisibility(View.GONE);
+        SizeLayout_Fun();
+
     }
 
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        // Checks the orientation of the screen
-        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            gridLayoutManager = new GridLayoutManager(HomeActivity.this,
-                    3);
-            recyclerView.setLayoutManager(gridLayoutManager);
-        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            linearLayoutManager = new LinearLayoutManager(HomeActivity.this,
-                    LinearLayoutManager.VERTICAL,
-                    false);
-            recyclerView.setLayoutManager(linearLayoutManager);
-            SizeLayout_Fun();
-        }
-
-
-        recyclerView.setAdapter(new RecipesAdapter(HomeActivity.this, recipes));
-    }
 
     @Override
     public void onNetworkConnectionChanged(boolean isConnected) {
         showSnack(isConnected);
     }
+
+    @VisibleForTesting
+    @NonNull
+    public CountingIdlingResource getIdlingResource() {
+        return mIdlingResource;
+    }
+
 }

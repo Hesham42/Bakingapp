@@ -1,10 +1,13 @@
 package com.example.root.bakingapp.Activity;
 
 import android.app.Activity;
+import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.Log;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.example.root.bakingapp.Fragment.DescriptionFragment;
@@ -16,27 +19,25 @@ import com.example.root.bakingapp.Fragment.StepFragment;
 
 import java.util.ArrayList;
 
-public class RecipeDetailsActivity extends Activity implements OnVersionNameSelectionChangeListener {
-    ArrayList<Step> steps=new ArrayList<>();
-    ArrayList<Ingredient> ingredients= new ArrayList<>();;
+public class RecipeDetailsActivity extends Activity
+        implements OnVersionNameSelectionChangeListener {
+    ArrayList<Step> steps = new ArrayList<>();
+    ArrayList<Ingredient> ingredients = new ArrayList<>();
+    FrameLayout frameLayout;
     public StepFragment stepFragment;
+    DescriptionFragment descriptionFragment;
+    String name;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Intent intent=getIntent();
+        Intent intent = getIntent();
         Bundle bundle = new Bundle();
         bundle = getIntent().getBundleExtra(getResources().getString(R.string.bundle));
-        if (bundle != null) {
-            steps = bundle.getParcelableArrayList(getResources().getString(R.string.steps));
-            ingredients = bundle.getParcelableArrayList(getResources().getString(R.string.ingredients));
+        steps = bundle.getParcelableArrayList(getResources().getString(R.string.steps));
+        ingredients = bundle.getParcelableArrayList(getResources().getString(R.string.ingredients));
 
-        }
-        else
-        {
-            Log.d("guinness","bundel==null");
-        }
         // Check whether the Activity is using the layout verison with the fragment_container
         // FrameLayout and if so we must add the first fragment
         if (findViewById(R.id.fragment_container) != null) {
@@ -48,39 +49,77 @@ public class RecipeDetailsActivity extends Activity implements OnVersionNameSele
                 return;
             }
 
-            // Create an Instance of Fragment
-            stepFragment =new StepFragment();
-            stepFragment.setArguments(getIntent().getBundleExtra(getResources().getString(R.string.bundle)));
-            getFragmentManager().beginTransaction()
-                    .add(R.id.fragment_container, stepFragment)
-                    .commit();
+            stepFragment = new StepFragment();
+            Bundle arg = getIntent().getBundleExtra(getResources().getString(R.string.bundle));
+            if (arg != null) {
+                stepFragment.setArguments(arg);
+                getFragmentManager().beginTransaction()
+                        .add(R.id.fragment_container, stepFragment)
+                        .commit();
+            } else {
+                Bundle bundle1 = new Bundle();
+                bundle1.putParcelableArrayList(getResources().getString(R.string.steps),
+                        (ArrayList<? extends Parcelable>) steps);
+                bundle1.putParcelableArrayList(getResources().getString(R.string.ingredients),
+                        (ArrayList<? extends Parcelable>) ingredients);
+
+                stepFragment.setArguments(bundle1);
+                getFragmentManager().beginTransaction()
+                        .add(R.id.fragment_container, stepFragment)
+                        .commit();
+            }
+
         }
     }
 
 
     @Override
     public void OnSelectionChanged(int versionNameIndex) {
-        DescriptionFragment descriptionFragment = (DescriptionFragment) getFragmentManager()
-                .findFragmentById(R.id.description_fragment);
+        descriptionFragment = (DescriptionFragment)
+                getFragmentManager()
+                        .findFragmentById(R.id.description_fragment);
 
         if (descriptionFragment != null) {
             // If description is available, we are in two pane layout
             // so we call the method in DescriptionFragment to update its content
-            stepFragment.setRecipes(versionNameIndex,steps,ingredients);
+            stepFragment.setRecipes(versionNameIndex, steps, ingredients);
             descriptionFragment.setDescription(versionNameIndex);
         } else {
-            DescriptionFragment newDesriptionFragment = new DescriptionFragment();
+            descriptionFragment = new DescriptionFragment();
             Bundle args = new Bundle();
             args.putInt(DescriptionFragment.KEY_POSITION, versionNameIndex);
             args.putBundle(getResources().getString(R.string.bundle), getIntent().getBundleExtra(getResources().getString(R.string.bundle)));
-            newDesriptionFragment.setArguments(args);
-            FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+            if (args != null) {
+                descriptionFragment.setArguments(args);
+            } else {
+                Bundle bundle = new Bundle();
+                bundle.putInt(DescriptionFragment.KEY_POSITION, versionNameIndex);
+                bundle.putParcelableArrayList(getResources().getString(R.string.steps),
+                        (ArrayList<? extends Parcelable>) steps);
+                descriptionFragment.setArguments(bundle);
 
+            }
+
+            FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
             // Replace whatever is in the fragment_container view with this fragment,
             // and add the transaction to the backStack so the User can navigate back
-            fragmentTransaction.replace(R.id.fragment_container, newDesriptionFragment);
+            fragmentTransaction.replace(R.id.fragment_container, descriptionFragment);
             fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
         }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList(getResources().getString(R.string.steps), steps);
+        outState.putParcelableArrayList(getResources().getString(R.string.ingredients), ingredients);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        steps=savedInstanceState.getParcelableArrayList(getResources().getString(R.string.steps));
+        ingredients=savedInstanceState.getParcelableArrayList(getResources().getString(R.string.ingredients));
     }
 }

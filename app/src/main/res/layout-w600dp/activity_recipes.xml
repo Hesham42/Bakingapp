@@ -11,11 +11,11 @@
         android:id="@+id/recipesList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:tag="@string/phone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:tag="@string/tablet"/>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"

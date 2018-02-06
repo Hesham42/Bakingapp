@@ -1,11 +1,13 @@
 package com.example.root.bakingapp.Activity;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.FrameLayout;
 import android.widget.Toast;
@@ -19,14 +21,12 @@ import com.example.root.bakingapp.Fragment.StepFragment;
 
 import java.util.ArrayList;
 
-public class RecipeDetailsActivity extends Activity
+public class RecipeDetailsActivity extends AppCompatActivity
         implements OnVersionNameSelectionChangeListener {
     ArrayList<Step> steps = new ArrayList<>();
     ArrayList<Ingredient> ingredients = new ArrayList<>();
-    FrameLayout frameLayout;
     public StepFragment stepFragment;
     DescriptionFragment descriptionFragment;
-    String name;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,18 +37,20 @@ public class RecipeDetailsActivity extends Activity
         bundle = getIntent().getBundleExtra(getResources().getString(R.string.bundle));
         steps = bundle.getParcelableArrayList(getResources().getString(R.string.steps));
         ingredients = bundle.getParcelableArrayList(getResources().getString(R.string.ingredients));
+        String name = bundle.getString(getResources().getString(R.string.recipe_name));
+        android.support.v7.app.ActionBar actionBar = this.getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
 
         // Check whether the Activity is using the layout verison with the fragment_container
         // FrameLayout and if so we must add the first fragment
         if (findViewById(R.id.fragment_container) != null) {
-
             // However if we are being restored from a previous state, then we don't
             // need to do anything and should return or we could end up with overlapping Fragments
             if (savedInstanceState != null) {
-
                 return;
             }
-
             stepFragment = new StepFragment();
             Bundle arg = getIntent().getBundleExtra(getResources().getString(R.string.bundle));
             if (arg != null) {
@@ -119,7 +121,7 @@ public class RecipeDetailsActivity extends Activity
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        steps=savedInstanceState.getParcelableArrayList(getResources().getString(R.string.steps));
-        ingredients=savedInstanceState.getParcelableArrayList(getResources().getString(R.string.ingredients));
+        steps = savedInstanceState.getParcelableArrayList(getResources().getString(R.string.steps));
+        ingredients = savedInstanceState.getParcelableArrayList(getResources().getString(R.string.ingredients));
     }
 }

@@ -57,8 +57,7 @@ public class StepFragment extends Fragment {
 
         if (savedInstanceState == null) {
             Bundle extra = getArguments();
-            ingredients =
-                    extra.getParcelableArrayList(getResources().getString(R.string.ingredients));
+            ingredients = extra.getParcelableArrayList(getResources().getString(R.string.ingredients));
             steps = extra.getParcelableArrayList(getResources().getString(R.string.steps));
         }else{
             ingredients = savedInstanceState.getParcelableArrayList(getResources().getString(R.string.ingredients));

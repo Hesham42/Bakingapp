@@ -81,19 +81,23 @@ public class RecipeDetailsActivity extends AppCompatActivity
                 getFragmentManager()
                         .findFragmentById(R.id.description_fragment);
 
-        if (descriptionFragment != null) {
+        if (descriptionFragment != null)
+        {
             // If description is available, we are in two pane layout
             // so we call the method in DescriptionFragment to update its content
             stepFragment.setRecipes(versionNameIndex, steps, ingredients);
             descriptionFragment.setDescription(versionNameIndex);
-        } else {
+        }
+        else
+        {
             descriptionFragment = new DescriptionFragment();
             Bundle args = new Bundle();
             args.putInt(DescriptionFragment.KEY_POSITION, versionNameIndex);
             args.putBundle(getResources().getString(R.string.bundle), getIntent().getBundleExtra(getResources().getString(R.string.bundle)));
             if (args != null) {
                 descriptionFragment.setArguments(args);
-            } else {
+        }
+        else {
                 Bundle bundle = new Bundle();
                 bundle.putInt(DescriptionFragment.KEY_POSITION, versionNameIndex);
                 bundle.putParcelableArrayList(getResources().getString(R.string.steps),

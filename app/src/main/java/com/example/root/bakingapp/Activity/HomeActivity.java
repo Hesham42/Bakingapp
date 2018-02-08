@@ -50,7 +50,8 @@ import retrofit2.Response;
 import static com.example.root.bakingapp.Utilites.NetworkStateChangeReceiver.IS_NETWORK_AVAILABLE;
 
 public class HomeActivity extends AppCompatActivity implements COMM,
-        ConnectivityReceiver.ConnectivityReceiverListener {
+        ConnectivityReceiver.ConnectivityReceiverListener
+{
     ArrayList<Recipe> recipes;
     @BindView(R.id.recipesList)
     RecyclerView recyclerView;

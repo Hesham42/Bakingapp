@@ -6,6 +6,7 @@ import android.app.Fragment;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -66,8 +67,7 @@ public class DescriptionFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
-    {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_description, container, false);
         mVersionDescriptionTextView = (TextView) view.findViewById(R.id.version_description);
         mPlayerView = (SimpleExoPlayerView) view.findViewById(R.id.player_view);
@@ -81,11 +81,17 @@ public class DescriptionFragment extends Fragment {
             steps = savedInstanceState.getParcelableArrayList(getResources().getString(R.string.steps));
             positionVideo = savedInstanceState.getLong(SELECTED_POSITION, C.TIME_UNSET);
         } else {
+            try {
+                Bundle extra = getArguments();
 
-            Bundle extra = getArguments();
-            Bundle bundle = extra.getBundle(getResources().getString(R.string.bundle));
-            mCurrentPosition=extra.getInt(KEY_POSITION);
-            steps = bundle.getParcelableArrayList(getResources().getString(R.string.steps));
+                Bundle bundle = extra.getBundle(getResources().getString(R.string.bundle));
+                mCurrentPosition = extra.getInt(KEY_POSITION);
+                steps = bundle.getParcelableArrayList(getResources().getString(R.string.steps));
+
+
+            }catch (Exception e){
+                Log.e("guinness","in the Descirption"+e);
+            }
 
         }
 
@@ -186,13 +192,13 @@ public class DescriptionFragment extends Fragment {
         }
     }
 
-    //
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        releasePlayer();
-    }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+        releasePlayer();
+
+    }
     //  ------------------------------------------------------------------------
 
     @Override
@@ -206,7 +212,7 @@ public class DescriptionFragment extends Fragment {
         Bundle args = getArguments();
         if (args != null) {
             setDescription(args.getInt(KEY_POSITION));
-            mCurrentPosition=args.getInt(KEY_POSITION);
+            mCurrentPosition = args.getInt(KEY_POSITION);
             Bundle bundle = args.getBundle(getResources().getString(R.string.bundle));
             steps = bundle.getParcelableArrayList(getResources().getString(R.string.steps));
 

@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,7 +38,6 @@ public class StepFragment extends Fragment {
     LinearLayoutManager ingredientsManager, stepsManager;
     int p1, p2;
     public StepFragment() {
-
     }
 
     @Override
@@ -57,8 +57,13 @@ public class StepFragment extends Fragment {
 
         if (savedInstanceState == null) {
             Bundle extra = getArguments();
+            try {
+
             ingredients = extra.getParcelableArrayList(getResources().getString(R.string.ingredients));
             steps = extra.getParcelableArrayList(getResources().getString(R.string.steps));
+            }catch (NullPointerException e){
+                Log.e("guinness","there is crach now in it ");
+            }
         }else{
             ingredients = savedInstanceState.getParcelableArrayList(getResources().getString(R.string.ingredients));
             steps = savedInstanceState.getParcelableArrayList(getResources().getString(R.string.steps));
@@ -100,6 +105,24 @@ public class StepFragment extends Fragment {
 
         return root;
     }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Bundle extra = getArguments();
+        if (extra!=null){
+            try {
+
+                ingredients = extra.getParcelableArrayList(getResources().getString(R.string.ingredients));
+                steps = extra.getParcelableArrayList(getResources().getString(R.string.steps));
+            }catch (NullPointerException e){
+                Log.e("guinness","there is crach now in it  Step"+e);
+            }
+
+        }
+
+    }
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);

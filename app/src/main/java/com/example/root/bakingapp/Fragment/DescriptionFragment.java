@@ -139,27 +139,32 @@ public class DescriptionFragment extends Fragment {
             next.setVisibility(View.VISIBLE);
         }
         releasePlayer();
-        if (steps.get(mCurrentPosition).getVideoURL().isEmpty()
-                && steps.get(mCurrentPosition).getThumbnailURL().isEmpty()) {
-            mPlayerView.setVisibility(GONE);
-            ImgthumbnailUrl.setVisibility(GONE);
-        } else if (!steps.get(mCurrentPosition).getVideoURL().isEmpty()) {
-            String videoUrl = steps.get(mCurrentPosition).getVideoURL();
-            ImgthumbnailUrl.setVisibility(GONE);
-            mPlayerView.setVisibility(View.VISIBLE);
-            initializePlayer(Uri.parse(videoUrl));
+        if (mCurrentPosition==-1){
+            Log.e("guinness","Description with postion -1");
 
-        } else {
-            String imageUrl = steps.get(mCurrentPosition).getThumbnailURL();
-            mPlayerView.setVisibility(GONE);
-            ImgthumbnailUrl.setVisibility(View.VISIBLE);
+        }else{
+            if (steps.get(mCurrentPosition).getVideoURL().isEmpty()
+                    && steps.get(mCurrentPosition).getThumbnailURL().isEmpty()) {
+                mPlayerView.setVisibility(GONE);
+                ImgthumbnailUrl.setVisibility(GONE);
+            } else if (!steps.get(mCurrentPosition).getVideoURL().isEmpty()) {
+                String videoUrl = steps.get(mCurrentPosition).getVideoURL();
+                ImgthumbnailUrl.setVisibility(GONE);
+                mPlayerView.setVisibility(View.VISIBLE);
+                initializePlayer(Uri.parse(videoUrl));
 
-            Glide.with(getActivity())
-                    .load(imageUrl)
-                    .into(ImgthumbnailUrl);
+            } else {
+                String imageUrl = steps.get(mCurrentPosition).getThumbnailURL();
+                mPlayerView.setVisibility(GONE);
+                ImgthumbnailUrl.setVisibility(View.VISIBLE);
+
+                Glide.with(getActivity())
+                        .load(imageUrl)
+                        .into(ImgthumbnailUrl);
+            }
+            mVersionDescriptionTextView.setText(steps.get(mCurrentPosition).getShortDescription());
+            current.setText((mCurrentPosition + 1) + "/" + steps.size());
         }
-        mVersionDescriptionTextView.setText(steps.get(mCurrentPosition).getShortDescription());
-        current.setText((mCurrentPosition + 1) + "/" + steps.size());
 
     }
 

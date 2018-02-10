@@ -62,7 +62,7 @@ public class StepFragment extends Fragment {
             ingredients = extra.getParcelableArrayList(getResources().getString(R.string.ingredients));
             steps = extra.getParcelableArrayList(getResources().getString(R.string.steps));
             }catch (NullPointerException e){
-                Log.e("guinness","there is crach now in it ");
+                Log.e("guinness","there is crach now in it Steps fragment ");
             }
         }else{
             ingredients = savedInstanceState.getParcelableArrayList(getResources().getString(R.string.ingredients));

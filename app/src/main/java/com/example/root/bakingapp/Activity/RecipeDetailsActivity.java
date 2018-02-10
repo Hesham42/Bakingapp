@@ -71,6 +71,30 @@ public class RecipeDetailsActivity extends AppCompatActivity
                         .commit();
             }
 
+        }else {
+            Log.e("guinness","the Fragment Container == null in RecipeDetailsActivity");
+            stepFragment = new StepFragment();
+            Bundle arg = getIntent().getBundleExtra(getResources().getString(R.string.bundle));
+            if (arg != null) {
+                stepFragment.setArguments(arg);
+
+                getFragmentManager().beginTransaction()
+                        .add(R.id.names_fragment, stepFragment)
+                        .commit();
+
+
+            }else {
+                Bundle bundle1 = new Bundle();
+                bundle1.putParcelableArrayList(getResources().getString(R.string.steps),
+                        (ArrayList<? extends Parcelable>) steps);
+                bundle1.putParcelableArrayList(getResources().getString(R.string.ingredients),
+                        (ArrayList<? extends Parcelable>) ingredients);
+
+                stepFragment.setArguments(bundle1);
+                getFragmentManager().beginTransaction()
+                        .add(R.id.names_fragment, stepFragment)
+                        .commit();
+            }
         }
     }
 

@@ -37,6 +37,7 @@ public class StepFragment extends Fragment {
     RecyclerView ingredientList;
     LinearLayoutManager ingredientsManager, stepsManager;
     int p1, p2;
+    OnVersionNameSelectionChangeListener listener;
     public StepFragment() {
     }
 
@@ -66,6 +67,7 @@ public class StepFragment extends Fragment {
         }else{
             ingredients = savedInstanceState.getParcelableArrayList(getResources().getString(R.string.ingredients));
             steps = savedInstanceState.getParcelableArrayList(getResources().getString(R.string.steps));
+            index= savedInstanceState.getInt("index");
             p1 =savedInstanceState.getInt(getResources().getString(R.string.p1));
             p2 =savedInstanceState.getInt(getResources().getString(R.string.p2));
         }
@@ -91,8 +93,10 @@ public class StepFragment extends Fragment {
                 recycler, new RecyclerTouchListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
-                        OnVersionNameSelectionChangeListener listener = (OnVersionNameSelectionChangeListener) getActivity();
+                        listener =
+                                (OnVersionNameSelectionChangeListener) getActivity();
                         listener.OnSelectionChanged(position);
+                        updateView(position);
                     }
 
                     @Override
@@ -100,9 +104,18 @@ public class StepFragment extends Fragment {
 
                     }
                 })
-        );
 
+        );
         return root;
+    }
+
+    private void updateView(int position) {
+        try{
+            recycler.getAdapter().notifyDataSetChanged();
+            recycler.scrollToPosition(position);
+        }catch (Exception e){
+
+        }
     }
 
     @Override
@@ -111,7 +124,6 @@ public class StepFragment extends Fragment {
         Bundle extra = getArguments();
         if (extra!=null){
             try {
-
                 ingredients = extra.getParcelableArrayList(getResources().getString(R.string.ingredients));
                 steps = extra.getParcelableArrayList(getResources().getString(R.string.steps));
             }catch (NullPointerException e){
@@ -127,6 +139,7 @@ public class StepFragment extends Fragment {
         super.onSaveInstanceState(outState);
         outState.putParcelableArrayList(getResources().getString(R.string.ingredients),ingredients);
         outState.putParcelableArrayList(getResources().getString(R.string.steps),steps);
+        outState.putInt("index",index);
         outState.putInt(getResources().getString(R.string.p1),((LinearLayoutManager)ingredientList.getLayoutManager()).findFirstCompletelyVisibleItemPosition());
         outState.putInt(getResources().getString(R.string.p2),((LinearLayoutManager)recycler.getLayoutManager()).findFirstCompletelyVisibleItemPosition());
      }
@@ -135,7 +148,5 @@ public class StepFragment extends Fragment {
     this.steps=steps;
     this.ingredients=ingredients;
     this.index=versionNameIndex;
-    OnVersionNameSelectionChangeListener listener = (OnVersionNameSelectionChangeListener) getActivity();
-    listener.OnSelectionChanged(versionNameIndex);
     }
 }

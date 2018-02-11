@@ -2,6 +2,7 @@
 package com.example.root.bakingapp.Fragment;
 
 
+import android.annotation.SuppressLint;
 import android.app.Fragment;
 import android.net.Uri;
 import android.os.Bundle;
@@ -29,11 +30,8 @@ import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-
-import butterknife.BindView;
 
 import static android.view.View.GONE;
 
@@ -83,14 +81,13 @@ public class DescriptionFragment extends Fragment {
         } else {
             try {
                 Bundle extra = getArguments();
-
                 Bundle bundle = extra.getBundle(getResources().getString(R.string.bundle));
                 mCurrentPosition = extra.getInt(KEY_POSITION);
                 steps = bundle.getParcelableArrayList(getResources().getString(R.string.steps));
 
 
-            }catch (Exception e){
-                Log.e("guinness","in the Descirption"+e);
+            } catch (Exception e) {
+                Log.e("guinness", "in the Descirption" + e);
             }
 
         }
@@ -139,10 +136,10 @@ public class DescriptionFragment extends Fragment {
             next.setVisibility(View.VISIBLE);
         }
         releasePlayer();
-        if (mCurrentPosition==-1){
-            Log.e("guinness","Description with postion -1");
+        if (mCurrentPosition == -1) {
+            Log.e("guinness", "Description with postion -1");
 
-        }else{
+        } else {
             if (steps.get(mCurrentPosition).getVideoURL().isEmpty()
                     && steps.get(mCurrentPosition).getThumbnailURL().isEmpty()) {
                 mPlayerView.setVisibility(GONE);
@@ -162,6 +159,7 @@ public class DescriptionFragment extends Fragment {
                         .load(imageUrl)
                         .into(ImgthumbnailUrl);
             }
+            hideSystemUi();
             mVersionDescriptionTextView.setText(steps.get(mCurrentPosition).getShortDescription());
             current.setText((mCurrentPosition + 1) + "/" + steps.size());
         }
@@ -216,24 +214,42 @@ public class DescriptionFragment extends Fragment {
         // that sets the description text
         Bundle args = getArguments();
         if (args != null) {
-            setDescription(args.getInt(KEY_POSITION));
+            setDescription(args.getInt(KEY_POSITION), steps);
             mCurrentPosition = args.getInt(KEY_POSITION);
             Bundle bundle = args.getBundle(getResources().getString(R.string.bundle));
             steps = bundle.getParcelableArrayList(getResources().getString(R.string.steps));
 
         } else if (mCurrentPosition != -1) {
-            // Set description based on savedInstanceState defined during onCreateView()
-            setDescription(mCurrentPosition);
+            setDescription(mCurrentPosition, steps);
+
         }
     }
 
-    public void setDescription(int descriptionIndex) {
-        mVersionDescriptionTextView.setText(steps.get(descriptionIndex).getShortDescription());
+    public void setDescription(int descriptionIndex, ArrayList<Step> steps) {
         mCurrentPosition = descriptionIndex;
+        this.steps = steps;
+        mVersionDescriptionTextView.setText(steps.get(descriptionIndex).getShortDescription());
         View_fun();
-
     }
 
+    @SuppressLint("InlinedApi")
+    private void hideSystemUi() {
+        mPlayerView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+
+
+        ImgthumbnailUrl.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+
+    }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {

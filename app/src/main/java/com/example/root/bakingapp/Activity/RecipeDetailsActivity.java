@@ -82,7 +82,6 @@ public class RecipeDetailsActivity extends AppCompatActivity
                         .add(R.id.names_fragment, stepFragment)
                         .commit();
 
-
             }else {
                 Bundle bundle1 = new Bundle();
                 bundle1.putParcelableArrayList(getResources().getString(R.string.steps),
@@ -109,11 +108,14 @@ public class RecipeDetailsActivity extends AppCompatActivity
         {
             // If description is available, we are in two pane layout
             // so we call the method in DescriptionFragment to update its content
+            Log.e("guinness","the descriptionFragment != null in RecipeDetailsActivity");
+
             stepFragment.setRecipes(versionNameIndex, steps, ingredients);
-            descriptionFragment.setDescription(versionNameIndex);
+            descriptionFragment.setDescription(versionNameIndex,steps);
         }
         else
         {
+            Log.e("guinness","the descriptionFragment == null in RecipeDetailsActivity");
             descriptionFragment = new DescriptionFragment();
             Bundle args = new Bundle();
             args.putInt(DescriptionFragment.KEY_POSITION, versionNameIndex);

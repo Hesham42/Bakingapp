@@ -144,9 +144,11 @@ public class StepFragment extends Fragment {
         outState.putInt(getResources().getString(R.string.p2),((LinearLayoutManager)recycler.getLayoutManager()).findFirstCompletelyVisibleItemPosition());
      }
 
-    public void setRecipes(int versionNameIndex, ArrayList<Step> steps, ArrayList<Ingredient> ingredients) {
+    public void setRecipes(int versionNameIndex, ArrayList<Step> steps, ArrayList<Ingredient> ingredients)
+    {
     this.steps=steps;
     this.ingredients=ingredients;
     this.index=versionNameIndex;
+
     }
 }

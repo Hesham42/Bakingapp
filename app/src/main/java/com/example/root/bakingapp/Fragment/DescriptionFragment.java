@@ -2,6 +2,7 @@
 package com.example.root.bakingapp.Fragment;
 
 
+import android.annotation.SuppressLint;
 import android.app.Fragment;
 import android.net.Uri;
 import android.os.Bundle;
@@ -21,6 +22,7 @@ import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.LoadControl;
 import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
@@ -52,6 +54,8 @@ public class DescriptionFragment extends Fragment {
     ArrayList<Step> steps = new ArrayList<>();
     private long positionVideo;
     Bundle bundle;
+    private int playerWindow;
+    private Timeline.Window window;
 
     public DescriptionFragment() {
 
@@ -68,6 +72,7 @@ public class DescriptionFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_description, container, false);
         mVersionDescriptionTextView = (TextView) view.findViewById(R.id.version_description);
         mPlayerView = (SimpleExoPlayerView) view.findViewById(R.id.player_view);
+        window = new Timeline.Window();
         next = view.findViewById(R.id.next_button);
         back = view.findViewById(R.id.back_button);
         current = view.findViewById(R.id.currentStep);
@@ -163,7 +168,7 @@ public class DescriptionFragment extends Fragment {
                             .load(imageUrl)
                             .into(ImgthumbnailUrl);
                 }
-//                hideSystemUi();
+                hideSystemUi();
                 mVersionDescriptionTextView.setText(steps.get(mCurrentPosition).getShortDescription());
                 current.setText((mCurrentPosition + 1) + "/" + steps.size());
 
@@ -196,6 +201,12 @@ public class DescriptionFragment extends Fragment {
      */
     private void releasePlayer() {
         if (player != null) {
+            playerWindow = player.getCurrentWindowIndex();
+            positionVideo=C.TIME_UNSET;
+            Timeline timeline = player.getCurrentTimeline();
+            if (timeline != null && timeline.getWindow(playerWindow, window).isSeekable) {
+                positionVideo = player.getCurrentPosition();
+            }
             player.release();
             player = null;
         }
@@ -239,24 +250,24 @@ public class DescriptionFragment extends Fragment {
         View_fun();
     }
 
-//    @SuppressLint("InlinedApi")
-//    private void hideSystemUi() {
-//        mPlayerView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
-//                | View.SYSTEM_UI_FLAG_FULLSCREEN
-//                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-//                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-//                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-//                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
-//
-//
-//        ImgthumbnailUrl.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
-//                | View.SYSTEM_UI_FLAG_FULLSCREEN
-//                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-//                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-//                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-//                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
-//
-//    }
+    @SuppressLint("InlinedApi")
+    private void hideSystemUi() {
+        mPlayerView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+
+
+        ImgthumbnailUrl.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+
+    }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {

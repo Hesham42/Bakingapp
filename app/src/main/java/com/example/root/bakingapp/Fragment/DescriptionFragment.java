@@ -2,7 +2,6 @@
 package com.example.root.bakingapp.Fragment;
 
 
-import android.annotation.SuppressLint;
 import android.app.Fragment;
 import android.net.Uri;
 import android.os.Bundle;
@@ -52,7 +51,7 @@ public class DescriptionFragment extends Fragment {
     TextView mVersionDescriptionTextView;
     ArrayList<Step> steps = new ArrayList<>();
     private long positionVideo;
-
+    Bundle bundle;
 
     public DescriptionFragment() {
 
@@ -77,14 +76,18 @@ public class DescriptionFragment extends Fragment {
         if (savedInstanceState != null) {
             mCurrentPosition = savedInstanceState.getInt(KEY_POSITION);
             steps = savedInstanceState.getParcelableArrayList(getResources().getString(R.string.steps));
-            positionVideo = savedInstanceState.getLong(SELECTED_POSITION, C.TIME_UNSET);
+            if (player==null){
+                Log.e("guinness","onRestoreInstanceState");
+            }else {
+                positionVideo = savedInstanceState.getLong(SELECTED_POSITION, C.TIME_UNSET);
+            }
+
         } else {
             try {
                 Bundle extra = getArguments();
-                Bundle bundle = extra.getBundle(getResources().getString(R.string.bundle));
+                bundle = extra.getBundle(getResources().getString(R.string.bundle));
                 mCurrentPosition = extra.getInt(KEY_POSITION);
                 steps = bundle.getParcelableArrayList(getResources().getString(R.string.steps));
-
 
             } catch (Exception e) {
                 Log.e("guinness", "in the Descirption" + e);
@@ -135,36 +138,39 @@ public class DescriptionFragment extends Fragment {
         } else {
             next.setVisibility(View.VISIBLE);
         }
-        releasePlayer();
-        if (mCurrentPosition == -1) {
-            Log.e("guinness", "Description with postion -1");
 
-        } else {
-            if (steps.get(mCurrentPosition).getVideoURL().isEmpty()
-                    && steps.get(mCurrentPosition).getThumbnailURL().isEmpty()) {
-                mPlayerView.setVisibility(GONE);
-                ImgthumbnailUrl.setVisibility(GONE);
-            } else if (!steps.get(mCurrentPosition).getVideoURL().isEmpty()) {
-                String videoUrl = steps.get(mCurrentPosition).getVideoURL();
-                ImgthumbnailUrl.setVisibility(GONE);
-                mPlayerView.setVisibility(View.VISIBLE);
-                initializePlayer(Uri.parse(videoUrl));
+            releasePlayer();
+            if (mCurrentPosition == -1) {
 
             } else {
-                String imageUrl = steps.get(mCurrentPosition).getThumbnailURL();
-                mPlayerView.setVisibility(GONE);
-                ImgthumbnailUrl.setVisibility(View.VISIBLE);
+                Log.d("guinness", "View_fun: "+mCurrentPosition);
+                if (steps.get(mCurrentPosition).getVideoURL().isEmpty()
+                        && steps.get(mCurrentPosition).getThumbnailURL().isEmpty()) {
+                    mPlayerView.setVisibility(GONE);
+                    ImgthumbnailUrl.setVisibility(GONE);
+                } else if (!steps.get(mCurrentPosition).getVideoURL().isEmpty()) {
+                    String videoUrl = steps.get(mCurrentPosition).getVideoURL();
+                    ImgthumbnailUrl.setVisibility(GONE);
+                    mPlayerView.setVisibility(View.VISIBLE);
+                    initializePlayer(Uri.parse(videoUrl));
 
-                Glide.with(getActivity())
-                        .load(imageUrl)
-                        .into(ImgthumbnailUrl);
+                } else {
+                    String imageUrl = steps.get(mCurrentPosition).getThumbnailURL();
+                    mPlayerView.setVisibility(GONE);
+                    ImgthumbnailUrl.setVisibility(View.VISIBLE);
+
+                    Glide.with(getActivity())
+                            .load(imageUrl)
+                            .into(ImgthumbnailUrl);
+                }
+//                hideSystemUi();
+                mVersionDescriptionTextView.setText(steps.get(mCurrentPosition).getShortDescription());
+                current.setText((mCurrentPosition + 1) + "/" + steps.size());
+
             }
-            hideSystemUi();
-            mVersionDescriptionTextView.setText(steps.get(mCurrentPosition).getShortDescription());
-            current.setText((mCurrentPosition + 1) + "/" + steps.size());
         }
 
-    }
+
 
     //-------------------------------------------------------------------------
     private void initializePlayer(Uri mediaUri) {
@@ -202,6 +208,7 @@ public class DescriptionFragment extends Fragment {
         releasePlayer();
 
     }
+
     //  ------------------------------------------------------------------------
 
     @Override
@@ -232,24 +239,24 @@ public class DescriptionFragment extends Fragment {
         View_fun();
     }
 
-    @SuppressLint("InlinedApi")
-    private void hideSystemUi() {
-        mPlayerView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
-                | View.SYSTEM_UI_FLAG_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
-
-
-        ImgthumbnailUrl.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
-                | View.SYSTEM_UI_FLAG_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
-
-    }
+//    @SuppressLint("InlinedApi")
+//    private void hideSystemUi() {
+//        mPlayerView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
+//                | View.SYSTEM_UI_FLAG_FULLSCREEN
+//                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+//                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+//                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+//                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+//
+//
+//        ImgthumbnailUrl.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
+//                | View.SYSTEM_UI_FLAG_FULLSCREEN
+//                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+//                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+//                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+//                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+//
+//    }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -257,8 +264,13 @@ public class DescriptionFragment extends Fragment {
         // Save the current description selection in case we need to recreate the fragment
         outState.putInt(KEY_POSITION, mCurrentPosition);
         outState.putParcelableArrayList(getResources().getString(R.string.steps), steps);
-        positionVideo = player.getCurrentPosition(); //then, save it on the bundle.
-        outState.putLong(SELECTED_POSITION, positionVideo);
+        if (null == player){
+            Log.e("guinness","this player null in the onSaveInstanceState");
+        }else{
+
+            positionVideo = player.getCurrentPosition(); //then, save it on the bundle.
+            outState.putLong(SELECTED_POSITION, positionVideo);
+        }
 
     }
 

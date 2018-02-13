@@ -26,7 +26,8 @@
         </activity>
 
         <activity android:name=".Activity.RecipeDetailsActivity"
-            android:launchMode="singleInstance"
+            android:launchMode="singleTop"
+            android:configChanges="orientation|screenSize"
             android:parentActivityName=".Activity.HomeActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

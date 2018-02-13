@@ -116,7 +116,9 @@ public class RecipeDetailsActivity extends AppCompatActivity
         else
         {
             Log.e("guinness","the descriptionFragment == null in RecipeDetailsActivity");
-            descriptionFragment = new DescriptionFragment();
+            descriptionFragment = (DescriptionFragment)
+                    getFragmentManager()
+                            .findFragmentById(R.id.description_fragment);
             Bundle args = new Bundle();
             args.putInt(DescriptionFragment.KEY_POSITION, versionNameIndex);
             args.putBundle(getResources().getString(R.string.bundle), getIntent().getBundleExtra(getResources().getString(R.string.bundle)));

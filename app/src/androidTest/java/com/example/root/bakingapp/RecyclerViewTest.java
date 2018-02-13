@@ -1,11 +1,10 @@
 package com.example.root.bakingapp;
 
-import android.support.test.InstrumentationRegistry;
 import android.support.test.espresso.contrib.RecyclerViewActions;
 import android.support.test.espresso.matcher.ViewMatchers;
 import android.test.ActivityInstrumentationTestCase2;
 
-import com.example.root.bakingapp.Activity.HomeActivity;
+import com.example.root.bakingapp.activity.HomeActivity;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;

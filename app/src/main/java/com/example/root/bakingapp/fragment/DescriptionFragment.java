@@ -201,12 +201,12 @@ public class DescriptionFragment extends Fragment {
      */
     private void releasePlayer() {
         if (player != null) {
-            playerWindow = player.getCurrentWindowIndex();
-            positionVideo=C.TIME_UNSET;
-            Timeline timeline = player.getCurrentTimeline();
-            if (timeline != null && timeline.getWindow(playerWindow, window).isSeekable) {
-                positionVideo = player.getCurrentPosition();
-            }
+//            playerWindow = player.getCurrentWindowIndex();
+//            positionVideo=C.TIME_UNSET;
+//            Timeline timeline = player.getCurrentTimeline();
+//            if (timeline != null && timeline.getWindow(playerWindow, window).isSeekable) {
+//                positionVideo = player.getCurrentPosition();
+//            }
             player.release();
             player = null;
         }

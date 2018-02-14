@@ -126,15 +126,20 @@ public class HomeActivity extends AppCompatActivity implements COMM,
         recyclerView.addOnItemTouchListener(new RecyclerTouchListener(HomeActivity.this, recyclerView, new RecyclerTouchListener.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                Bundle bundle = new Bundle();
-                bundle.putParcelableArrayList(getResources().getString(R.string.steps),
-                        (ArrayList<? extends Parcelable>) recipes.get(position).getSteps());
-                bundle.putParcelableArrayList(getResources().getString(R.string.ingredients),
-                        (ArrayList<? extends Parcelable>) recipes.get(position).getIngredients());
-                bundle.putString(getResources().getString(R.string.recipe_name), recipes.get(position).getName());
-                Intent intent = new Intent(HomeActivity.this, RecipeDetailsActivity.class);
-                intent.putExtra(getResources().getString(R.string.bundle), bundle);
-                startActivity(intent);
+                boolean isConnected = ConnectivityReceiver.isConnected();
+                showSnack(isConnected);
+                if (isConnected){
+                    Bundle bundle = new Bundle();
+                    bundle.putParcelableArrayList(getResources().getString(R.string.steps),
+                            (ArrayList<? extends Parcelable>) recipes.get(position).getSteps());
+                    bundle.putParcelableArrayList(getResources().getString(R.string.ingredients),
+                            (ArrayList<? extends Parcelable>) recipes.get(position).getIngredients());
+                    bundle.putString(getResources().getString(R.string.recipe_name), recipes.get(position).getName());
+                    Intent intent = new Intent(HomeActivity.this, RecipeDetailsActivity.class);
+                    intent.putExtra(getResources().getString(R.string.bundle), bundle);
+                    startActivity(intent);
+
+                }
 
             }
 
